@@ -64,6 +64,12 @@ namespace PositionCalculator.Tests
                 .Throws<System.Net.Mail.SmtpException>();
 
             Assert.Throws<System.Net.Mail.SmtpException>(() => mailer.SendMail(mockMailClient.Object));
+
+            //Verify that the MailClient's SendMail methods gets called exactly twice when string is passed as parameters
+            mockMailClient.Verify(
+                client => client.SendMail(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()),
+                Times.Exactly(2)
+            );
         }
     }
 
@@ -86,7 +92,14 @@ namespace PositionCalculator.Tests
 
         public bool SendMail(IMailClient mailClient)
         {
-            return mailClient.SendMail(this.From, this.To, this.Subject, this.Body);
+            try
+            {
+                return mailClient.SendMail(this.From, this.To, this.Subject, this.Body);
+            }
+            catch (Exception ex)
+            {
+                return mailClient.SendMail(this.From, this.To, this.Subject, this.Body);
+            }
         }
     }
 
